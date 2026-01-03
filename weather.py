@@ -10,7 +10,7 @@ API_KEY = os.getenv("API_KEY")
 def get_weather():
     url = "https://api.openweathermap.org/data/2.5/weather"
     params = {
-        "q": "Okazaki,jp",
+        "q": "Toyota,jp",
         "units": "metric",
         "appid": API_KEY,
         "lang": "ja"
