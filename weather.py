@@ -5,14 +5,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.getenv("API_KEY")
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 
 def get_weather():
     url = "https://api.openweathermap.org/data/2.5/weather"
     params = {
         "q": "Toyota,jp",
         "units": "metric",
-        "appid": API_KEY,
+        "appid": WEATHER_API_KEY,
         "lang": "ja"
     }
 
