@@ -20,18 +20,14 @@
 
         <section class="decision">
             <div class="decision-icon">
-                {% if "歩け" in judgment.decision %}
-                    🚶
-                {% elif "バス" in judgment.decision %}
-                    🚌
-                {% elif "ダッシュ" in judgment.decision %}
-                    🏃
-                {% else %}
-                    ⚖️
+                {% if judgment.simple_mode == "walk" %}
+                    歩け!
+                {% elif judgment.simple_mode == "bus" %}
+                    バスに乗る!
                 {% endif %}
             </div>
-            <h2 style="color: #ff4500; font-size: 2rem; margin: 10px 0;">{{ judgment.decision }}</h2>
-            <p class="decision-sub">{{ judgment.reason | safe }}</p>
+            <!-- <h2 style="color: #ff4500; font-size: 2rem; margin: 10px 0;">{{ judgment.decision }}</h2>
+            <p class="decision-sub">{{ judgment.reason | safe }}</p> -->
         </section>
 
         <hr>
