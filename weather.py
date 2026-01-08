@@ -20,7 +20,7 @@ def get_weather():
     data = res.json()
     #print(data)
 
-    weather = data["weather"][0]["description"]
+    weather = data["weather"][0]["main"]
     temp = data["main"]["temp"]
 
     return weather, temp
