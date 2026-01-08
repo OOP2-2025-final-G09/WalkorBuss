@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from calculator import get_next_bus_from_json  # バス時刻取得はここに任せる
 
 # 設定：所要時間
-WALK_MINUTES = 15      # 徒歩で駅までかかる時間
+WALK_MINUTES = 12      # 徒歩で駅までかかる時間
 BUS_RIDE_MINUTES = 7   # バス乗車時間
 
 def load_json(filename):
@@ -106,34 +106,46 @@ def judge_walk_or_bus():
     decision = "判断中..."
     reason = ""
 
-    # 両方の手段がない場合
-    if not main_target["can_walk"] and not main_target["can_bus"]:
-        decision = "ダッシュか次へ"
-        reason = f"次の岡崎行き({main_target['next_train']})には<br>どちらも間に合いません。"
-    # 両方間に合う場合
-    elif main_target["can_walk"] and main_target["can_bus"]:
-        decision = "どちらでもOK"
-        reason = f"次の電車に間に合います。<br>天気や気分で選んでください。"
-    # バスだけ間に合う場合
-    elif main_target["can_bus"]:
-        decision = "バスに乗れ！"
-        reason = "今歩くと間に合いませんが<br>バスなら間に合います。"
-    # 徒歩だけ間に合う場合（バス待ちが長いなど）
-    elif main_target["can_walk"]:
-        decision = "歩け！"
-        reason = "次のバスを待つと遅れますが<br>今歩けば間に合います。"
+    # --- A. シンプル判定（徒歩 vs バスだけ）---
+    simple_decision = "判断中..."
+    simple_mode = "neutral"  # walk / bus / neutral
+    simple_reason = ""
+
+    minutes_until_bus = bus_data.get("minutesUntilNextBus")
+
+    if minutes_until_bus is None:
+        simple_decision = "歩け！"
+        simple_mode = "walk"
+        simple_reason = "今日はもうバスがありません。"
+    else:
+        if minutes_until_bus <= WALK_MINUTES:
+            simple_decision = "バスに乗れ！"
+            simple_mode = "bus"
+            simple_reason = f"バスは {minutes_until_bus}分後、歩くと{WALK_MINUTES}分かかります。"
+        else:
+            simple_decision = "歩け！"
+            simple_mode = "walk"
+            simple_reason = f"歩けば{WALK_MINUTES}分、バスは {minutes_until_bus}分後です。"
 
     # --- 5. 結果を返す ---
     return {
-        "decision": decision,
-        "reason": reason,
-        "bus_dep_time": bus_time_str if bus_time_str else "終了",
-        "minutes_until_bus": bus_data.get("minutesUntilNextBus"),
-        # 岡崎方面データ
-        "okazaki": results["okazaki"],
-        # 高蔵寺方面データ
-        "kozoji": results["kozoji"]
+    # --- 上の大判定用 ---
+    "simple_decision": simple_decision,
+    "simple_mode": simple_mode,
+    "simple_reason": simple_reason,
+
+    # --- 既存 ---
+    "decision": decision,
+    "reason": reason,
+    "bus_dep_time": bus_time_str if bus_time_str else "終了",
+    "minutes_until_bus": minutes_until_bus,
+
+    "okazaki": results["okazaki"],
+    "kozoji": results["kozoji"]
     }
+
+    
+
 
 # デバッグ用
 if __name__ == "__main__":
