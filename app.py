@@ -1,7 +1,8 @@
 # Flaskサーバー
 from flask import Flask, render_template
 from weather import get_weather
-from calculator import get_next_bus_from_json 
+from calculator import get_next_bus_from_json
+
 
 app = Flask(__name__)
 
