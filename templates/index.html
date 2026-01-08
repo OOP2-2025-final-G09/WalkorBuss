@@ -21,7 +21,7 @@
         <section class="decision">
             <div class="decision-icon">アイコン</div>
             <h2>歩く or バス</h2>
-            <p class="decision-sub">次のバスまでで?分あります</p>
+            <p class="decision-sub">次のバスまでで{{ minutesUntilNextBus }}分あります</p>
         </section>
 
         <hr>
@@ -32,7 +32,7 @@
             </div>
             <div class="next-bus-right">
                 <p class="time">{{ nextBusTime }}</p>
-                <p class="remain">あと{{ minutesUntilNextBus }}分後</p>
+                <p class="remain">{{ minutesUntilNextBus }}分後</p>
             </div>
         </section>
 
