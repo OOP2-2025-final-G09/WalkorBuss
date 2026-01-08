@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WalkorBus</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
 
@@ -68,15 +70,6 @@
         </section>
 
     </main>
-
-    <!-- JS -->
-    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-
-    <h1>天気と気温</h1>
-    <p>天気：{{ weather }}</p>
-    <p>気温：{{ temp }} ℃</p>
-
+  
 </body>
 </html>
-
