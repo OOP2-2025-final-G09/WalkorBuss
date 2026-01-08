@@ -3,69 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WalkorBus</title>
+    <title>Walk or Buss</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
 
-    <!-- タイトル -->
     <header class="app-header">
-        <h1>二者択一</h1>
-        <p class="subtitle">通勤経路判断アプリ</p>
+        <h1>Walk or Buss</h1>
+        <p class="subtitle">愛知工業大学 → 八草駅</p>
     </header>
 
-    <!-- メインカード -->
     <main class="card">
 
-        <!-- 選択結果 -->
         <section class="decision">
-            <div class="decision-icon">アイコン</div>
-            <h2>歩く or バス</h2>
-            <p class="decision-sub">次のバスまでで?分あります</p>
+            <div class="decision-icon">
+                {% if "歩け" in judgment.decision %}
+                    🚶
+                {% elif "バス" in judgment.decision %}
+                    🚌
+                {% elif "ダッシュ" in judgment.decision %}
+                    🏃
+                {% else %}
+                    ⚖️
+                {% endif %}
+            </div>
+            <h2 style="color: #ff4500; font-size: 2rem; margin: 10px 0;">{{ judgment.decision }}</h2>
+            <p class="decision-sub">{{ judgment.reason | safe }}</p>
         </section>
 
         <hr>
 
-        <!-- 次のバス -->
         <section class="next-bus">
             <div class="next-bus-left">
                 <p class="label">次のバス</p>
             </div>
             <div class="next-bus-right">
-                <p class="time">??:??</p>
-                <p class="remain">あと ?分</p>
-            </div>
-        </section>
-
-        <!-- 電車情報 -->
-        <section class="train-info">
-            <p class="label">電車の方向（参考情報）</p>
-
-            <div class="train-card">
-                <h3>岡崎行き</h3>
-                <p>次の電車：テスト</p>
-                <p>バスで行くと：待ち テスト分</p>
-                <p>歩いて行くと：待ち テスト分</p>
-            </div>
-
-            <div class="train-card">
-                <h3>高蔵寺行き</h3>
-                <p>次の電車：テスト</p>
-                <p>バスで行くと：待ち テスト分</p>
-                <p>歩いて行くと：待ち テスト分</p>
+                <p class="time" style="font-size: 1.5rem; font-weight: bold;">{{ judgment.bus_dep_time }}</p>
+                {% if judgment.minutes_until_bus is not none %}
+                    <p class="remain">あと {{ judgment.minutes_until_bus }}分</p>
+                {% endif %}
             </div>
         </section>
 
         <hr>
 
-        <!-- 天気 -->
+        <section class="train-info">
+            <p class="label">電車の方向別判定</p>
+
+            <div class="train-card" style="border-left: 5px solid #ff4500; margin-bottom: 10px;">
+                <h3>岡崎行き</h3>
+                <p>次の電車：<strong>{{ judgment.okazaki.next_train }}</strong></p>
+                <p>バスで行くと：{{ judgment.okazaki.bus_status }}</p>
+                <p>歩いて行くと：{{ judgment.okazaki.walk_status }}</p>
+            </div>
+
+            <div class="train-card" style="border-left: 5px solid #0066cc;">
+                <h3>高蔵寺行き</h3>
+                <p>次の電車：<strong>{{ judgment.kozoji.next_train }}</strong></p>
+                <p>バスで行くと：{{ judgment.kozoji.bus_status }}</p>
+                <p>歩いて行くと：{{ judgment.kozoji.walk_status }}</p>
+            </div>
+        </section>
+
+        <hr>
+
         <section class="weather">
             <p class="label">天気</p>
             <div class="weather-info">
-                <span class="temperature">テスト℃</span>
-                <span class="weather-icon">テスト</span>
+                <span class="weather-icon">{{ weather }}</span>
+                <span class="temperature"><strong>{{ temp }}</strong> ℃</span>
             </div>
         </section>
 
