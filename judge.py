@@ -1,17 +1,15 @@
 import json
 import os
 from datetime import datetime, timedelta
-from calculator import get_next_bus_from_json  # バス時刻取得はここに任せる
+from calculator import get_next_bus_from_json
 
-# 設定：所要時間
-WALK_MINUTES = 15      # 徒歩で駅までかかる時間
+# 設定
+WALK_MINUTES = 15      # 徒歩所要時間
 BUS_RIDE_MINUTES = 7   # バス乗車時間
 
 def load_json(filename):
-    """単純なリスト形式の電車時刻表JSONを読み込む"""
     filepath = os.path.join("data", filename)
     if not os.path.exists(filepath):
-        # dataフォルダになければカレントディレクトリを探す
         filepath = filename
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -19,36 +17,39 @@ def load_json(filename):
     except FileNotFoundError:
         return []
 
-def get_next_train(current_dt, timetable):
+def get_dt_from_str(base_dt, time_str):
+    """HH:MM文字列をdatetimeオブジェクトに変換"""
+    hour, minute = map(int, time_str.split(':'))
+    return base_dt.replace(hour=hour, minute=minute, second=0, microsecond=0)
+
+def find_catchable_train(now, timetable, arrival_walk, arrival_bus):
     """
-    指定時刻以降の直近の電車時刻を取得
-    timetable: ["HH:MM", ...] のリスト
-    return: datetimeオブジェクト, 文字列"HH:MM"
+    徒歩またはバスのどちらかで間に合う、直近の電車を探す
     """
-    current_time_str = current_dt.strftime("%H:%M")
+    current_time_str = now.strftime("%H:%M")
     
+    # 時刻表をループして探す
     for time_str in timetable:
-        if time_str > current_time_str:
-            hour, minute = map(int, time_str.split(':'))
-            # 日付またぎは考慮せず、当日として扱う
-            target_dt = current_dt.replace(hour=hour, minute=minute, second=0, microsecond=0)
-            return target_dt, time_str
+        # そもそも現在時刻より前の電車は無視（念のため）
+        if time_str < current_time_str:
+            continue
+            
+        train_dt = get_dt_from_str(now, time_str)
+        
+        # 判定: 徒歩で間に合う OR バスで間に合う？
+        can_walk = arrival_walk <= train_dt
+        
+        can_bus = False
+        if arrival_bus:
+            can_bus = arrival_bus <= train_dt
+            
+        # どちらか一方で間に合うなら、これをターゲット電車とする
+        if can_walk or can_bus:
+            return train_dt, time_str
             
     return None, None
 
-def check_connection(arrival_dt, train_dt):
-    """到着時刻と電車時刻を比較して、間に合うかと待ち時間を返す"""
-    if not arrival_dt or not train_dt:
-        return False, -1
-    
-    if arrival_dt <= train_dt:
-        wait_time = int((train_dt - arrival_dt).total_seconds() / 60)
-        return True, wait_time
-    else:
-        return False, -1
-
 def get_status_text(can_make_it, wait_time):
-    """表示用のテキストを生成"""
     if can_make_it:
         return f"待ち {wait_time}分"
     else:
@@ -57,23 +58,21 @@ def get_status_text(can_make_it, wait_time):
 def judge_walk_or_bus():
     now = datetime.now()
     
-    # --- 1. バス情報の取得 (calculator.pyを使用) ---
-    bus_data = get_next_bus_from_json(now)
-    bus_time_str = bus_data.get("nextBusTime") # "HH:MM" or None
+    # --- 1. バスと徒歩の「駅到着時刻」を先に確定させる ---
     
-    # バス到着時刻の計算
-    if bus_time_str:
-        bh, bm = map(int, bus_time_str.split(':'))
-        bus_dep_dt = now.replace(hour=bh, minute=bm, second=0, microsecond=0)
-        arrival_bus_dt = bus_dep_dt + timedelta(minutes=BUS_RIDE_MINUTES)
-    else:
-        bus_dep_dt = None
-        arrival_bus_dt = None
-
-    # --- 2. 徒歩到着時刻の計算 ---
+    # 徒歩到着時刻
     arrival_walk_dt = now + timedelta(minutes=WALK_MINUTES)
+    
+    # バス到着時刻
+    bus_data = get_next_bus_from_json(now)
+    bus_time_str = bus_data.get("nextBusTime")
+    
+    arrival_bus_dt = None
+    if bus_time_str:
+        bus_dep_dt = get_dt_from_str(now, bus_time_str)
+        arrival_bus_dt = bus_dep_dt + timedelta(minutes=BUS_RIDE_MINUTES)
 
-    # --- 3. 電車情報の取得と判定 (岡崎 & 高蔵寺) ---
+    # --- 2. 方面ごとに「乗れる電車」を探す ---
     train_files = {
         "okazaki": "train_okazaki.json",
         "kozoji": "train_kozoji.json"
@@ -82,59 +81,70 @@ def judge_walk_or_bus():
     results = {}
 
     for key, file in train_files.items():
-        # 時刻表読み込み
         timetable = load_json(file)
-        # 次の電車を取得
-        train_dt, train_str = get_next_train(now, timetable)
         
-        # 判定
-        can_walk, wait_walk = check_connection(arrival_walk_dt, train_dt)
-        can_bus, wait_bus = check_connection(arrival_bus_dt, train_dt)
+        # ★ここが変更点: 単なる「次の電車」ではなく「間に合う電車」を探す
+        train_dt, train_str = find_catchable_train(now, timetable, arrival_walk_dt, arrival_bus_dt)
         
-        results[key] = {
-            "next_train": train_str if train_str else "終了",
-            "walk_status": get_status_text(can_walk, wait_walk),
-            "bus_status": get_status_text(can_bus, wait_bus),
-            "can_walk": can_walk,
-            "can_bus": can_bus
-        }
+        if train_dt:
+            # その電車に対する待ち時間を再計算
+            is_walk_ok = arrival_walk_dt <= train_dt
+            wait_walk = int((train_dt - arrival_walk_dt).total_seconds() / 60) if is_walk_ok else -1
+            
+            is_bus_ok = False
+            wait_bus = -1
+            if arrival_bus_dt:
+                is_bus_ok = arrival_bus_dt <= train_dt
+                wait_bus = int((train_dt - arrival_bus_dt).total_seconds() / 60) if is_bus_ok else -1
+            
+            results[key] = {
+                "next_train": train_str,
+                "walk_status": get_status_text(is_walk_ok, wait_walk),
+                "bus_status": get_status_text(is_bus_ok, wait_bus),
+                "can_walk": is_walk_ok,
+                "can_bus": is_bus_ok
+            }
+        else:
+            # 終電後など、どうやっても間に合う電車がない場合
+            results[key] = {
+                "next_train": "終了",
+                "walk_status": "-",
+                "bus_status": "-",
+                "can_walk": False,
+                "can_bus": False
+            }
 
-    # --- 4. メインの判断 (Decision) ---
-    # 基本的に岡崎行きを基準にメインメッセージを決める（または両方考慮）
-    main_target = results["okazaki"]
+    # --- 3. メイン判定（岡崎行きを基準にする） ---
+    target = results["okazaki"]
     
-    decision = "判断中..."
+    decision = ""
     reason = ""
 
-    # 両方の手段がない場合
-    if not main_target["can_walk"] and not main_target["can_bus"]:
-        decision = "ダッシュか次へ"
-        reason = f"次の岡崎行き({main_target['next_train']})には<br>どちらも間に合いません。"
-    # 両方間に合う場合
-    elif main_target["can_walk"] and main_target["can_bus"]:
+    if target["next_train"] == "終了":
+        decision = "営業終了"
+        reason = "本日の電車は終了しました"
+    elif target["can_walk"] and target["can_bus"]:
         decision = "どちらでもOK"
-        reason = f"次の電車に間に合います。<br>天気や気分で選んでください。"
-    # バスだけ間に合う場合
-    elif main_target["can_bus"]:
+        reason = f"次の電車({target['next_train']})に間に合います。<br>お好きな方でどうぞ。"
+    elif target["can_bus"]:
         decision = "バスに乗れ！"
-        reason = "今歩くと間に合いませんが<br>バスなら間に合います。"
-    # 徒歩だけ間に合う場合（バス待ちが長いなど）
-    elif main_target["can_walk"]:
+        reason = f"今歩くと{target['next_train']}に間に合いませんが<br>バスなら間に合います。"
+    elif target["can_walk"]:
         decision = "歩け！"
-        reason = "次のバスを待つと遅れますが<br>今歩けば間に合います。"
+        reason = f"次のバスだと{target['next_train']}に間に合いませんが<br>今歩けば間に合います。"
+    else:
+        # find_catchable_trainを通しているのでここには来ないはずだが念のため
+        decision = "急げ！"
+        reason = "かなりギリギリです。"
 
-    # --- 5. 結果を返す ---
     return {
         "decision": decision,
         "reason": reason,
         "bus_dep_time": bus_time_str if bus_time_str else "終了",
         "minutes_until_bus": bus_data.get("minutesUntilNextBus"),
-        # 岡崎方面データ
         "okazaki": results["okazaki"],
-        # 高蔵寺方面データ
         "kozoji": results["kozoji"]
     }
 
-# デバッグ用
 if __name__ == "__main__":
     print(judge_walk_or_bus())
