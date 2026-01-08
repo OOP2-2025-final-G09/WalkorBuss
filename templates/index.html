@@ -3,23 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WalkorBuss</title>
+    <title>WalkorBus</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
 
-    <!-- メイン画面 -->
-    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- タイトル -->
+    <header class="app-header">
+        <h1>二者択一</h1>
+        <p class="subtitle">通勤経路判断アプリ</p>
+    </header>
 
-    <h1>天気と気温</h1>
-    <p>天気：{{ weather }}</p>
-    <p>気温：{{ temp }} ℃</p>
+    <!-- メインカード -->
+    <main class="card">
 
-    <h1>愛工大 → 八草駅</h1>
-    <p>次のバス：{{ nextBusTime }}</p>
-    <p>{{ minutesUntilNextBus }}分後</p>
+        <!-- 選択結果 -->
+        <section class="decision">
+            <div class="decision-icon">アイコン</div>
+            <h2>歩く or バス</h2>
+            <p class="decision-sub">次のバスまでで?分あります</p>
+        </section>
 
+        <hr>
+
+        <!-- 次のバス -->
+        <section class="next-bus">
+            <div class="next-bus-left">
+                <p class="label">次のバス</p>
+            </div>
+            <div class="next-bus-right">
+                <p class="time">??:??</p>
+                <p class="remain">あと ?分</p>
+            </div>
+        </section>
+
+        <!-- 電車情報 -->
+        <section class="train-info">
+            <p class="label">電車の方向（参考情報）</p>
+
+            <div class="train-card">
+                <h3>岡崎行き</h3>
+                <p>次の電車：テスト</p>
+                <p>バスで行くと：待ち テスト分</p>
+                <p>歩いて行くと：待ち テスト分</p>
+            </div>
+
+            <div class="train-card">
+                <h3>高蔵寺行き</h3>
+                <p>次の電車：テスト</p>
+                <p>バスで行くと：待ち テスト分</p>
+                <p>歩いて行くと：待ち テスト分</p>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- 天気 -->
+        <section class="weather">
+            <p class="label">天気</p>
+            <div class="weather-info">
+                <span class="temperature">テスト℃</span>
+                <span class="weather-icon">テスト</span>
+            </div>
+        </section>
+
+    </main>
+  
 </body>
 </html>
-

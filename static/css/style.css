@@ -1,1 +1,73 @@
-/* スタイル */
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background: #f2f2f2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.app-header {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.card {
+    background: white;
+    width: 90%;
+    max-width: 420px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.decision {
+    text-align: center;
+}
+
+.decision-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.decision-sub {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.next-bus {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.next-bus-right {
+    text-align: right;
+}
+
+.train-info {
+    margin-top: 10px;
+}
+
+.train-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.weather {
+    margin-top: 15px;
+}
+
+.weather-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
