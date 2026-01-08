@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Walk or Buss</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
 
@@ -64,16 +67,36 @@
         <hr>
 
         <section class="weather">
-            <p class="label">天気</p>
-            <div class="weather-info">
+        <p class="label">天気</p>
 
-                <span class="weather-icon">{{ weather }}</span>
-                <span class="temperature"><strong>{{ temp }}</strong> ℃</span>
+        <div class="weather-info">
+            {% if weather == "Clear" %}
+                <i data-lucide="sun"></i>
 
-            </div>
-        </section>
+            {% elif weather == "Clouds" %}
+                <i data-lucide="cloud"></i>
+
+            {% elif weather == "Rain" or weather == "Drizzle" %}
+                <i data-lucide="cloud-rain"></i>
+
+            {% elif weather == "Snow" %}
+                <i data-lucide="snowflake"></i>
+
+            {% elif weather == "Thunderstorm" %}
+                <i data-lucide="cloud-lightning"></i>
+
+            {% else %}
+                <i data-lucide="help-circle"></i>
+                <span>不明</span>
+            {% endif %}
+
+            <span class="temperature"><strong>気温 : {{ temp }}</strong> ℃</span>
+        </div>
+    </section>
 
     </main>
-  
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
