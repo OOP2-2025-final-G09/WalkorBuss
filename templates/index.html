@@ -1,102 +1,191 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Walk or Buss</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WALK OR BUSS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
+
 <body>
 
-    <header class="app-header">
-        <h1>Walk or Buss</h1>
-        <p class="subtitle">愛知工業大学 → 八草駅</p>
-    </header>
+  <!-- 上部タイトル -->
+  <header class="app-header">
+    <h1 class="app-title">WALK OR BUSS</h1>
+    <p class="app-subtitle">通勤経路判断アプリ</p>
+  </header>
 
-    <main class="card">
+  <main class="card">
 
-        <section class="decision">
-            <div class="decision-icon">
-                {% if judgment.simple_mode == "walk" %}
-                    歩け!
-                {% elif judgment.simple_mode == "bus" %}
-                    バスに乗る!
-                {% endif %}
-            </div>
-            <!-- <h2 style="color: #ff4500; font-size: 2rem; margin: 10px 0;">{{ judgment.decision }}</h2>
-            <p class="decision-sub">{{ judgment.reason | safe }}</p> -->
-        </section>
+    <!-- ---------- decision（上部） ---------- -->
+    <section class="decision">
+      <div class="decision-icon
+        {% if judgment.simple_mode == 'walk' %} is-walk
+        {% elif judgment.simple_mode == 'bus' %} is-bus
+        {% else %} is-unknown
+        {% endif %}">
+        {% if judgment.simple_mode == "walk" %}
+          <i data-lucide="footprints"></i>
+        {% elif judgment.simple_mode == "bus" %}
+          <i data-lucide="bus"></i>
+        {% else %}
+          <i data-lucide="help-circle"></i>
+        {% endif %}
+      </div>
 
-        <hr>
+      <h1 class="decision-title">
+        {% if judgment.simple_mode == "walk" %}
+          歩く
+        {% elif judgment.simple_mode == "bus" %}
+          バスに乗る
+        {% else %}
+          判定できません
+        {% endif %}
+      </h1>
 
-        <section class="next-bus">
-            <div class="next-bus-left">
-                <p class="label">次のバス</p>
-            </div>
-            <div class="next-bus-right">
-                <p class="time" style="font-size: 1.5rem; font-weight: bold;">{{ judgment.bus_dep_time }}</p>
-                {% if judgment.minutes_until_bus is not none %}
-                    <p class="remain">あと {{ judgment.minutes_until_bus }}分</p>
-                {% endif %}
-            </div>
-        </section>
-
-        <hr>
-
-        <section class="train-info">
-            <p class="label">電車の方向別判定</p>
-
-            <div class="train-card" style="border-left: 5px solid #ff4500; margin-bottom: 10px;">
-                <h3>岡崎行き</h3>
-                <p>次の電車：<strong>{{ judgment.okazaki.next_train }}</strong></p>
-                <p>バスで行くと：{{ judgment.okazaki.bus_status }}</p>
-                <p>歩いて行くと：{{ judgment.okazaki.walk_status }}</p>
-            </div>
-
-            <div class="train-card" style="border-left: 5px solid #0066cc;">
-                <h3>高蔵寺行き</h3>
-                <p>次の電車：<strong>{{ judgment.kozoji.next_train }}</strong></p>
-                <p>バスで行くと：{{ judgment.kozoji.bus_status }}</p>
-                <p>歩いて行くと：{{ judgment.kozoji.walk_status }}</p>
-            </div>
-        </section>
-
-        <hr>
-
-        <section class="weather">
-        <p class="label">天気</p>
-
-        <div class="weather-info">
-            {% if weather == "Clear" %}
-                <i data-lucide="sun"></i>
-
-            {% elif weather == "Clouds" %}
-                <i data-lucide="cloud"></i>
-
-            {% elif weather == "Rain" or weather == "Drizzle" %}
-                <i data-lucide="cloud-rain"></i>
-
-            {% elif weather == "Snow" %}
-                <i data-lucide="snowflake"></i>
-
-            {% elif weather == "Thunderstorm" %}
-                <i data-lucide="cloud-lightning"></i>
-
-            {% else %}
-                <i data-lucide="help-circle"></i>
-                <span>不明</span>
-            {% endif %}
-
-            <span class="temperature"><strong>気温 : {{ temp }}</strong> ℃</span>
-        </div>
+      <p class="decision-sub">
+        {% if judgment.minutes_until_bus is not none %}
+          次のバスまで{{ judgment.minutes_until_bus }}分あります
+        {% else %}
+          ---
+        {% endif %}
+      </p>
     </section>
 
-    </main>
-    <script>
-        lucide.createIcons();
-    </script>
+    <hr>
+
+    <!-- ---------- next-bus ---------- -->
+    <section class="next-bus">
+      <div class="next-bus-left">
+        <p class="label">次のバス</p>
+      </div>
+
+      <div class="next-bus-right">
+        <p class="time">{{ judgment.bus_dep_time }}</p>
+        {% if judgment.minutes_until_bus is not none %}
+          <p class="remain">あと {{ judgment.minutes_until_bus }}分</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- ---------- train-info ---------- -->
+    <section class="train-info">
+      <p class="label train-label">
+        <i data-lucide="train"></i>
+        電車の方向（参考情報）
+      </p>
+
+      <!-- 岡崎行き -->
+      <div class="train-card">
+        <h3>岡崎行き</h3>
+        <p class="train-next">次の電車：<strong>{{ judgment.okazaki.next_train }}</strong></p>
+
+        <div class="train-choices">
+          <div class="choice">
+            <i data-lucide="bus"></i>
+            <span class="choice-label">バスで行くと：</span>
+            <span class="status {% if '間に合わない' in judgment.okazaki.bus_status %}bad{% endif %}">
+              {{ judgment.okazaki.bus_status }}
+            </span>
+          </div>
+
+          <div class="choice">
+            <i data-lucide="footprints"></i>
+            <span class="choice-label">歩いて行くと：</span>
+            <span class="status">
+              {{ judgment.okazaki.walk_status }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 高蔵寺行き -->
+      <div class="train-card">
+        <h3>高蔵寺行き</h3>
+        <p class="train-next">次の電車：<strong>{{ judgment.kozoji.next_train }}</strong></p>
+
+        <div class="train-choices">
+          <div class="choice">
+            <i data-lucide="bus"></i>
+            <span class="choice-label">バスで行くと：</span>
+            <span class="status {% if '間に合わない' in judgment.kozoji.bus_status %}bad{% endif %}">
+              {{ judgment.kozoji.bus_status }}
+            </span>
+          </div>
+
+          <div class="choice">
+            <i data-lucide="footprints"></i>
+            <span class="choice-label">歩いて行くと：</span>
+            <span class="status">
+              {{ judgment.kozoji.walk_status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- ---------- weather ---------- -->
+    <section class="weather">
+      <p class="label weather-label">天気</p>
+
+      <div class="weather-info">
+        <div class="weather-right">
+          <div class="temperature">{{ temp }}°C</div>
+          <div class="weather-text">
+            {{ weather_jp if weather_jp is defined else weather }}
+          </div>
+        </div>
+
+        {% if weather == "Clear" %}
+          <i data-lucide="sun"></i>
+        {% elif weather == "Clouds" %}
+          <i data-lucide="cloud"></i>
+        {% elif weather == "Rain" or weather == "Drizzle" %}
+          <i data-lucide="cloud-rain"></i>
+        {% elif weather == "Snow" %}
+          <i data-lucide="snowflake"></i>
+        {% elif weather == "Thunderstorm" %}
+          <i data-lucide="cloud-lightning"></i>
+        {% else %}
+          <i data-lucide="help-circle"></i>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- デバッグ表示（ボタンで開閉） -->
+    <section id="debugPanel" class="debug-panel" hidden>
+      <pre class="debug-pre">{{ judgment | tojson(indent=2) }}</pre>
+    </section>
+
+  </main>
+
+  <!-- 下部（最終更新 / デバッグ表示 / 更新） -->
+  <footer class="app-footer">
+    <div class="footer-left">
+      最終更新: <span id="lastUpdated">--:--:--</span>
+    </div>
+
+    <div class="footer-right">
+      <button type="button" id="debugToggle" class="footer-btn">
+        デバッグ表示
+      </button>
+
+      <button type="button" id="refreshBtn" class="footer-btn">
+        <i data-lucide="rotate-cw"></i>
+        更新
+      </button>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
 </body>
 </html>
