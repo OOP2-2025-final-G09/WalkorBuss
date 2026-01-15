@@ -74,4 +74,5 @@ python app.py
 http://localhost:5000
 ```
 
+### アクセスすると直後に以下のような画面が表示されます
 ![画面イメージ](images/FLONT_IMG01.png)
