@@ -19,12 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const panel = document.getElementById("debugPanel");
 
   // デバッグ表示の開閉
-  if (debugBtn && panel) {
-    debugBtn.addEventListener("click", () => {
-      panel.hidden = !panel.hidden;
-      setLastUpdatedNow();
-    });
-  }
+//   if (debugBtn && panel) {
+//     debugBtn.addEventListener("click", () => {
+//       panel.hidden = !panel.hidden;
+//       setLastUpdatedNow();
+//     });
+//   }
 
   // 更新（ページ再読み込み）
   if (refreshBtn) {
