@@ -73,3 +73,5 @@ python app.py
 ```
 http://localhost:5000
 ```
+
+![画面イメージ](images/FLONT_IMG01.png)
