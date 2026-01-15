@@ -27,7 +27,7 @@
 - 徒歩 or バスの最適手段の判定
 
 ## 実行画面
-![画面イメージ](images/FLONT_IMG02.png)
+![画面イメージ](images/FLONT_IMG01.png)
 
 ## 前提条件
 
