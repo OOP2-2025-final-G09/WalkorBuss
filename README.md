@@ -73,8 +73,11 @@ python app.py
 ```
 http://localhost:5000
 ```
-## 開発者の問い合わせ先
 
+アクセスする以下のような画面が表示されます
+![画面イメージ](images/FLONT_IMG01.png)
+
+## 開発者の問い合わせ先
 1.  時刻表から、次に来るバスが何時のものかを出力,CSSの仕上げ（担当： yusei-kubota https://github.com/yusei-kubota）
 2. 時刻表から、次に来る電車が何時のものかを出力,乗るor乗らない判断部分の作成（担当：Ajdjduwvzkdjdhs https://github.com/Ajdjduwvzkdjdhs）
 3. プルリクの確認/マージ,judge.pyの修正（担当： kopo-k https://github.com/kopo-k）
